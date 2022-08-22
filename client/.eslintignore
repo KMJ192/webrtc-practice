@@ -1,0 +1,6 @@
+dist/*
+public/*
+custom.d.ts
+babel*
+postcss*
+node_modules/*
