@@ -13,7 +13,7 @@ const postcssLoader = {
 };
 
 module.exports = {
-  entry: './index.ts',
+  entry: './src/index.ts',
   resolve: {
     extensions: ['.js', '.ts'],
     alias: {
@@ -21,6 +21,8 @@ module.exports = {
       '@react': path.resolve(__dirname, 'custom_modules/react'),
       '@router': path.resolve(__dirname, 'custom_modules/router'),
       '@api': path.resolve(__dirname, 'custom_modules/api'),
+      '@redux': path.resolve(__dirname, 'custom_modules/redux'),
+      '@storage': path.resolve(__dirname, 'custom_modules/storage'),
     },
   },
   module: {
@@ -39,7 +41,7 @@ module.exports = {
         test: /\.s[ac]ss$/i,
         oneOf: [
           {
-            test: /\.module\.s[ac]ss$/i,
+            test: /\.module\.s[ac]ss$/,
             use: [
               MiniCssExtractPlugin.loader,
               {

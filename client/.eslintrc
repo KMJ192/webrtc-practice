@@ -32,7 +32,7 @@
   },
   "settings": { 
     "import/parsers": {
-      "@typescript-eslint/parser": [".ts", ".js"] 
+      "@typescript-eslint/parser": [".ts"] 
     }, 
     "import/resolver": { 
       "typescript": "./tsconfig.json" 
