@@ -8,6 +8,7 @@ import {
 import { createDOM, debounceFrame, isProvider } from './utils';
 
 const React: ReactType = (function () {
+  let isRender = false;
   /**
    * React 클로저 옵션
    */
@@ -108,6 +109,12 @@ const React: ReactType = (function () {
   function useEffect(effect: () => any, depsArray?: any[]) {
     const { states, stateKey: currStateKey } = _this;
 
+    if (!isRender) {
+      routeRenderer();
+      isRender = true;
+      return;
+    }
+
     // 실제로 React는 Deps배열이 없으면 callback함수를 실행시킨다.
     const hasNoDeps = !depsArray;
     const deps = states[currStateKey];
@@ -182,6 +189,7 @@ const React: ReactType = (function () {
    */
   function routeRenderer() {
     _this.states = [];
+    isRender = false;
     if (_this.componentUnmount) {
       _this.componentUnmount();
       _this.componentUnmount = undefined;
