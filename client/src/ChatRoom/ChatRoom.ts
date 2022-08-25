@@ -11,9 +11,10 @@ function ChatRoom() {
   const getMedia = async () => {
     const cam = document.querySelector('.cam-area');
     if (cam === null) return;
+    const camOptions = document.querySelector('.cam-options');
 
     const initialConstraints = {
-      audio: true,
+      audio: false,
       video: {
         facingMode: 'user',
       },
@@ -32,27 +33,30 @@ function ChatRoom() {
         (device: MediaDeviceInfo) => device.kind === 'videoinput',
       );
       const currentCamera = myStream.getVideoTracks()[0];
-      console.log(currentCamera);
-      // cameras.forEach((camera) => {
 
-      // })
+      cameras.forEach((camera) => {
+        const option = document.createElement('option');
+        option.value = camera.deviceId;
+        option.innerText = camera.label;
+        if (currentCamera.label === camera.label) {
+          option.selected = true;
+        }
+        camOptions?.appendChild(option);
+      });
     } catch (e) {
       console.log(e);
     }
   };
 
-  // useDocument(() => {
-  //   console.log(document.getElementById('test'));
-  // });
-
-  useEffect(() => {
+  useDocument(() => {
     getMedia();
-  }, []);
+  });
 
   return `
     <section class="${cx('chatroom-page')}" id="test">
       <h1>chat room ${id}</h1>
-      <video class="cam-area"></video>
+      <video autoplay class="cam-area"></video>
+      <select class="cam-options"></select>
     </section>
   `;
 }
