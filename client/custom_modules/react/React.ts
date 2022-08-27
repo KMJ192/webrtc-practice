@@ -190,7 +190,8 @@ const React: ReactType = (function () {
   function routeRenderer() {
     _this.states = [];
     isRender = false;
-    if (_this.componentUnmount) {
+
+    if (typeof _this.componentUnmount === 'function') {
       _this.componentUnmount();
       _this.componentUnmount = undefined;
     }
