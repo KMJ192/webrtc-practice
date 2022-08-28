@@ -71,7 +71,7 @@ const Router = (function () {
    * @param data history.pushState에 입력할 data
    */
   function useRedirection(url: string, data?: { [key: string]: string }) {
-    history.pushState(data, '', url);
+    window.history.pushState(data, '', url);
     React.routeRenderer();
   }
 

@@ -22,7 +22,7 @@ const React: ReactType = (function () {
     // react 컴포넌트
     component: null,
     // useEffect unmount 함수
-    componentUnmount: undefined,
+    componentUnmount: [],
     // dom api를 사용하는 공간
     injected: {
       event: [],
@@ -122,7 +122,7 @@ const React: ReactType = (function () {
       ? !depsArray?.every((el: any, i: number) => el === deps[i])
       : true;
     if (hasNoDeps || hasChangedDeps) {
-      _this.componentUnmount = effect();
+      _this.componentUnmount.push(effect());
       states[currStateKey] = depsArray;
     }
     _this.stateKey++;
@@ -191,10 +191,12 @@ const React: ReactType = (function () {
     _this.states = [];
     isRender = false;
 
-    if (typeof _this.componentUnmount === 'function') {
-      _this.componentUnmount();
-      _this.componentUnmount = undefined;
-    }
+    _this.componentUnmount.forEach((unmountFunc: () => void) => {
+      if (typeof unmountFunc === 'function') {
+        unmountFunc();
+      }
+    });
+    _this.componentUnmount = [];
 
     if (_this.injected.unmount) {
       _this.injected.unmount.forEach((unmount) => {

@@ -20,7 +20,7 @@ interface ReactClosureOptions {
   stateKey: number;
   states: any[];
   component?: (() => ReactDOM[]) | (() => ReactDOM) | null;
-  componentUnmount?: () => void;
+  componentUnmount: (() => void)[];
   injected: {
     event: (() => any)[];
     unmount?: (() => any)[];
