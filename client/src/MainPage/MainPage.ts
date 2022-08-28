@@ -1,16 +1,9 @@
-import { io } from 'socket.io-client';
-
-import { useState, useStateNoRender, useDocument } from '@react';
+import { useStateNoRender, useDocument } from '@react';
 import { useRedirection } from '@router';
 
 import classNames from 'classnames/bind';
 import style from './MainPage.module.scss';
 const cx = classNames.bind(style);
-
-const socket = io('http://localhost:8080', {
-  path: '/socket.io',
-  transports: ['websocket'],
-});
 
 function MainPage() {
   const [value, setValue] = useStateNoRender('');

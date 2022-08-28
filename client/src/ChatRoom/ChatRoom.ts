@@ -1,9 +1,12 @@
 import { useDocument, useState, useEffect } from '@react';
-import { useParam, useRedirection } from '@router';
+import { useParam } from '@router';
+import { socket } from '@src/webRTCConnection';
 
 import classNames from 'classnames/bind';
 import style from './ChatRoom.module.scss';
 const cx = classNames.bind(style);
+
+const peerConnection = new RTCPeerConnection();
 
 function ChatRoom() {
   const [isDisable, setIsDisable] = useState({
@@ -11,8 +14,19 @@ function ChatRoom() {
     audio: '소리 끄기',
   });
   const [mediaStream, setMediaStream] = useState(null);
-  const { id } = useParam();
+  const [addedTracks, setAddedTracks] = useState(false);
+  const { id: roomName } = useParam();
 
+  socket.on('welcome', async () => {
+    const offer = await peerConnection.createOffer();
+    peerConnection.setLocalDescription(offer);
+    socket.emit('offer', offer, roomName);
+    console.log('send the offer');
+  });
+
+  /**
+   * 디바이스의 미디어 탐색
+   */
   const getMedia = async () => {
     if (!mediaStream) return;
     const cam = document.querySelector('.cam-area');
@@ -43,6 +57,10 @@ function ChatRoom() {
     }
   };
 
+  /**
+   * media 설정 (카메라 / 소리 켜기, 끄기)
+   * @param isVideo
+   */
   const mediaHandler = (isVideo: boolean) => {
     if (isVideo) {
       const isCloseVideo = isDisable.video === '카메라 끄기';
@@ -65,12 +83,41 @@ function ChatRoom() {
     }
   };
 
+  /**
+   * 카메라 켜기 끄기
+   */
   const onClickCameraBtn = () => {
     mediaHandler(true);
   };
 
+  /**
+   * 소리 켜기 끄기
+   */
   const onClickMuteBtn = () => {
     mediaHandler(false);
+  };
+
+  /**
+   * 뒤로 가기
+   */
+  const goBack = () => {
+    window.history.back();
+  };
+
+  /**
+   * ice
+   * @param data
+   */
+  const handleIce = (data: RTCPeerConnectionIceEvent) => {
+    socket.emit('ice', data.candidate, roomName);
+  };
+
+  const handleAddStream = (data: any) => {
+    const peerStream: HTMLVideoElement | null =
+      document.querySelector('.peer-stream');
+    if (peerStream) {
+      peerStream.srcObject = data.stream;
+    }
   };
 
   useDocument(() => {
@@ -91,6 +138,30 @@ function ChatRoom() {
     };
   });
 
+  useDocument(() => {
+    const backBtn = document.querySelector('.back-btn');
+    backBtn?.addEventListener('click', goBack);
+
+    return () => {
+      backBtn?.removeEventListener('click', goBack);
+    };
+  });
+
+  useDocument(() => {
+    if (mediaStream && !addedTracks) {
+      setAddedTracks(true);
+      peerConnection.addEventListener('icecandidate', handleIce);
+      peerConnection.addEventListener('addstream', handleAddStream);
+      (mediaStream as MediaStream)
+        .getTracks()
+        .forEach((track) => peerConnection.addTrack(track, mediaStream));
+      return () => {
+        peerConnection.removeEventListener('icecandidate', handleIce);
+        peerConnection.removeEventListener('addstream', handleAddStream);
+      };
+    }
+  });
+
   useEffect(async () => {
     const initialConstraints = {
       audio: true,
@@ -105,11 +176,13 @@ function ChatRoom() {
 
   return `
     <section class="${cx('chatroom-page')}" id="test">
-      <h1>chat room ${id}</h1>
+      <h1>chat room [${roomName}]</h1>
       <video autoplay class="cam-area"></video>
       <select class="cam-options"></select>
       <button class="cam-btn">${isDisable.video}</button>
       <button class="mute-btn">${isDisable.audio}</button>
+      <button class="back-btn">뒤로가기</button>
+      <video autoplay class="peer-stream"></video>
     </section>
   `;
 }
