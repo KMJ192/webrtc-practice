@@ -67,7 +67,7 @@ const React: ReactType = (function () {
       if (newState === state) return;
       if (JSON.stringify(newState) === JSON.stringify(state)) return;
 
-      states[key] = newState;
+      _this.states[key] = newState;
       reactRenderer();
     };
     _this.stateKey += 1;
@@ -89,7 +89,7 @@ const React: ReactType = (function () {
       if (newState === st) return;
       if (JSON.stringify(newState) === JSON.stringify(st)) return;
 
-      states[key] = newState;
+      _this.states[key] = newState;
     };
 
     const state = () => {
@@ -114,7 +114,6 @@ const React: ReactType = (function () {
       isRender = true;
       return;
     }
-
     // 실제로 React는 Deps배열이 없으면 callback함수를 실행시킨다.
     const hasNoDeps = !depsArray;
     const deps = states[currStateKey];
@@ -123,7 +122,7 @@ const React: ReactType = (function () {
       : true;
     if (hasNoDeps || hasChangedDeps) {
       _this.componentUnmount.push(effect());
-      states[currStateKey] = depsArray;
+      _this.states[currStateKey] = depsArray;
     }
     _this.stateKey++;
   }
