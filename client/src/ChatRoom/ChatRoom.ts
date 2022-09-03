@@ -15,14 +15,8 @@ function ChatRoom() {
   });
   const [mediaStream, setMediaStream] = useState(null);
   const [addedTracks, setAddedTracks] = useState(false);
+  const [mount, setMount] = useState(false);
   const { id: roomName } = useParam();
-
-  socket.on('welcome', async () => {
-    const offer = await peerConnection.createOffer();
-    peerConnection.setLocalDescription(offer);
-    socket.emit('offer', offer, roomName);
-    console.log('send the offer');
-  });
 
   /**
    * 디바이스의 미디어 탐색
@@ -147,14 +141,15 @@ function ChatRoom() {
     };
   });
 
+  // WebRTC Peer Connection 생성
   useDocument(() => {
     if (mediaStream && !addedTracks) {
-      setAddedTracks(true);
       peerConnection.addEventListener('icecandidate', handleIce);
       peerConnection.addEventListener('addstream', handleAddStream);
       (mediaStream as MediaStream)
         .getTracks()
         .forEach((track) => peerConnection.addTrack(track, mediaStream));
+      setAddedTracks(true);
       return () => {
         peerConnection.removeEventListener('icecandidate', handleIce);
         peerConnection.removeEventListener('addstream', handleAddStream);
@@ -173,6 +168,18 @@ function ChatRoom() {
       await navigator.mediaDevices.getUserMedia(initialConstraints),
     );
   }, [mediaStream]);
+
+  useEffect(() => {
+    if (addedTracks && !mount) {
+      setMount(true);
+      socket.on('welcome', async () => {
+        const offer = await peerConnection.createOffer();
+        peerConnection.setLocalDescription(offer);
+        socket.emit('offer', offer, roomName);
+        console.log('send the offer');
+      });
+    }
+  }, []);
 
   return `
     <section class="${cx('chatroom-page')}" id="test">
